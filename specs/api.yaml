@@ -1,0 +1,128 @@
+openapi: "3.0.0"
+info:
+  title: Simple Tiny URL API server
+  version: 0.0.1
+  license:
+    name: MIT
+paths:
+  /api:
+    get:
+      summary: Shows API spec
+      operationId: apiSpec
+      responses:
+        "200":
+          description: Array of all created shorthands
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+  /api/tiny:
+    get:
+      summary: Lists all shorthands IDs
+      operationId: list
+      security:
+        - BearerAuth: [] # Read access token
+      responses:
+        "200":
+          description: Array of all created shorthands
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TinyURLs"
+    post:
+      summary: Create a new URL shorthand
+      operationId: createTinyURL
+      security:
+        - BearerAuth: [] # Write access token
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: url
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "201":
+          description: Data of created tiny URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TinyURL"
+
+  /api/tiny/{id}:
+    get:
+      summary: Get redirected to long URL
+      operationId: followURL
+      parameters:
+        - name: id
+          description: Shorthand ID
+          in: path
+          required: true
+          schema: 
+            type: string
+      responses:
+        "301":
+          description: Redirect to long URL
+    post:
+      summary: Update URL shorthand
+      operationId: updateTinyURL
+      security:
+        - BearerAuth: [] # Write access token
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: url
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: ID successfully updated with new URL
+
+  /api/tiny/{id}/expand:
+    get:
+      summary: Get info of the shorthand ID
+      operationId: expandURL
+      security:
+        - BearerAuth: [] # Read access token
+      parameters:
+        - name: id
+          description: Shorthand ID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Info of the shorthand ID
+          content:
+            application.json:
+              schema:
+                  $ref: "#/components/schemas/TinyURL"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    TinyURL:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        
+    TinyURLs:
+      type: array
+      items:
+        $ref: "#/components/schemas/TinyURL"
