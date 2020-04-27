@@ -30,7 +30,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TinyURLs"
     post:
-      summary: Create a new URL shorthand
+      summary: Create a new tiny URL entry
       operationId: createTinyURL
       security:
         - BearerAuth: [] # Write access token
@@ -68,7 +68,7 @@ paths:
         "301":
           description: Redirect to long URL
     post:
-      summary: Update URL shorthand
+      summary: Update tiny URL entry
       operationId: updateTinyURL
       security:
         - BearerAuth: [] # Write access token
@@ -86,10 +86,24 @@ paths:
       responses:
         "204":
           description: ID successfully updated with new URL
+    delete:
+      summary: Remove a tiny URL entry
+      operationId: removeTinyURL
+      security:
+        - BearerAuth: [] # Delete/write access token
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Entry successfully removed
 
   /api/tiny/{id}/expand:
     get:
-      summary: Get info of the shorthand ID
+      summary: Get info for the tiny URL ID
       operationId: expandURL
       security:
         - BearerAuth: [] # Read access token
