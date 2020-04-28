@@ -16,6 +16,7 @@ type Handlers interface {
 	FollowURL(http.ResponseWriter, *http.Request)
 	UpdateTinyURL(http.ResponseWriter, *http.Request)
 	ExpandURL(http.ResponseWriter, *http.Request)
+	RemoveTinyURL(http.ResponseWriter, *http.Request)
 }
 
 // DefaultHandlers implements Handlers with the default implementation
@@ -29,24 +30,28 @@ func (h *DefaultHandlers) APISpec(res http.ResponseWriter, req *http.Request) {
 	http.ServeFile(res, req, apiSpecFile)
 }
 
-// List Lists all shorthand IDs
+// List Lists all tiny URL entries
 func (h *DefaultHandlers) List(res http.ResponseWriter, req *http.Request) {
 
 }
 
-// CreateTinyURL Create a new URL shorthand
+// CreateTinyURL Create a new tiny URL entry
 func (h *DefaultHandlers) CreateTinyURL(res http.ResponseWriter, req *http.Request) {
 }
 
-// FollowURL Get redirected to long URL
+// FollowURL Get redirected to full URL
 func (h *DefaultHandlers) FollowURL(res http.ResponseWriter, req *http.Request) {
 
 }
 
-// UpdateTinyURL Update URL shorthand
+// UpdateTinyURL Update a tiny URL entry
 func (h *DefaultHandlers) UpdateTinyURL(res http.ResponseWriter, req *http.Request) {
 }
 
-// ExpandURL Get info of the shorthand ID
+// ExpandURL Get info for the tiny URL ID entry
 func (h *DefaultHandlers) ExpandURL(res http.ResponseWriter, req *http.Request) {
+}
+
+// RemoveTinyURL Remove a tiny URL entry
+func (h *DefaultHandlers) RemoveTinyURL(res http.ResponseWriter, req *http.Request) {
 }

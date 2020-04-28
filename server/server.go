@@ -42,12 +42,14 @@ func (s *Server) AddAPIRoutesAndHandlers(r *mux.Router, handler Handlers, auth A
 	createHandler := http.HandlerFunc(handler.CreateTinyURL)
 	updateHandler := http.HandlerFunc(handler.UpdateTinyURL)
 	expandHandler := http.HandlerFunc(handler.ExpandURL)
+	deleteHandler := http.HandlerFunc(handler.RemoveTinyURL)
 
 	r.HandleFunc("/api", handler.APISpec).Methods("GET")
 	r.Handle("/api/tiny", auth.AuthenticateRead(listHandler)).Methods("GET")
 	r.Handle("/api/tiny", auth.AuthenticateWrite(createHandler)).Methods("POST")
 	r.HandleFunc("/api/tiny/{id}", handler.FollowURL).Methods("GET")
 	r.Handle("/api/tiny/{id}", auth.AuthenticateWrite(updateHandler)).Methods("POST")
+	r.Handle("/api/tiny/{id}", auth.AuthenticateWrite(deleteHandler)).Methods("DELETE")
 	r.Handle("/api/tiny/{id}/expand", auth.AuthenticateRead(expandHandler)).Methods("GET")
 }
 

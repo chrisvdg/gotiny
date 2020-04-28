@@ -18,7 +18,7 @@ paths:
                 type: string
   /api/tiny:
     get:
-      summary: Lists all shorthands IDs
+      summary: Lists all tiny URL entries
       operationId: list
       security:
         - BearerAuth: [] # Read access token
@@ -55,7 +55,7 @@ paths:
 
   /api/tiny/{id}:
     get:
-      summary: Get redirected to long URL
+      summary: Get redirected to full URL
       operationId: followURL
       parameters:
         - name: id
@@ -68,7 +68,7 @@ paths:
         "301":
           description: Redirect to long URL
     post:
-      summary: Update tiny URL entry
+      summary: Update a tiny URL entry
       operationId: updateTinyURL
       security:
         - BearerAuth: [] # Write access token
@@ -103,7 +103,7 @@ paths:
 
   /api/tiny/{id}/expand:
     get:
-      summary: Get info for the tiny URL ID
+      summary: Get info for the tiny URL ID entry
       operationId: expandURL
       security:
         - BearerAuth: [] # Read access token
