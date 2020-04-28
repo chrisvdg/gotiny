@@ -20,11 +20,7 @@ type Server struct {
 }
 
 // AddAPIRoutes adds the API routes with default handlers
-func (s *Server) AddAPIRoutes(r *mux.Router) error {
-	b, err := business.NewLogic()
-	if err != nil {
-		return err
-	}
+func (s *Server) AddAPIRoutes(r *mux.Router, b *business.Logic) error {
 	h := &DefaultHandlers{b: b}
 
 	auth := &DefaultAuthorizer{}
@@ -46,7 +42,7 @@ func (s *Server) AddAPIRoutesAndHandlers(r *mux.Router, handler Handlers, auth A
 
 	r.HandleFunc("/api", handler.APISpec).Methods("GET")
 	r.Handle("/api/tiny", auth.AuthenticateRead(listHandler)).Methods("GET")
-	r.Handle("/api/tiny", auth.AuthenticateWrite(createHandler)).Methods("POST")
+	r.Handle("/api/tiny", auth.AuthenticateCreate(createHandler)).Methods("POST")
 	r.HandleFunc("/api/tiny/{id}", handler.FollowURL).Methods("GET")
 	r.Handle("/api/tiny/{id}", auth.AuthenticateWrite(updateHandler)).Methods("POST")
 	r.Handle("/api/tiny/{id}", auth.AuthenticateWrite(deleteHandler)).Methods("DELETE")

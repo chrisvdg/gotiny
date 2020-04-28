@@ -135,6 +135,8 @@ components:
           type: string
         url:
           type: string
+        created:
+          type: number # unix timestamp
         
     TinyURLs:
       type: array
