@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -40,7 +39,7 @@ func (f *File) List() ([]TinyURL, error) {
 		result = append(result, TinyURL{
 			ID:      k,
 			URL:     v.URL,
-			Created: v.Created.Time(),
+			Created: v.Created,
 		})
 	}
 
@@ -55,11 +54,11 @@ func (f *File) Create(id string, url string) (TinyURL, error) {
 	t := TinyURL{
 		ID:      id,
 		URL:     url,
-		Created: time.Now(),
+		Created: JSONTime(time.Now()),
 	}
 	f.data[id] = fileEntry{
 		URL:     url,
-		Created: jsonTime(t.Created),
+		Created: JSONTime(t.Created),
 	}
 
 	err := f.save()
@@ -84,7 +83,7 @@ func (f *File) Get(id string) (TinyURL, error) {
 	result := TinyURL{
 		ID:      id,
 		URL:     val.URL,
-		Created: val.Created.Time(),
+		Created: val.Created,
 	}
 
 	return result, nil
@@ -165,48 +164,11 @@ func (f *File) ensureFile() error {
 	return file.Close()
 }
 
-// FileConfig represents a file backend config
-type FileConfig struct{}
-
 // List represents a list of backend entries
 type fileData map[string]fileEntry
 
 // Entry represents a tiny URL entry in the backend
 type fileEntry struct {
 	URL     string   `json:"url"`
-	Created jsonTime `json:"created"`
-}
-
-// Time represents a unix time stamp
-type jsonTime time.Time
-
-// MarshalJSON is used to convert the timestamp to JSON
-func (t jsonTime) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatInt(time.Time(t).Unix(), 10)), nil
-}
-
-// UnmarshalJSON is used to convert the timestamp from JSON
-func (t *jsonTime) UnmarshalJSON(s []byte) (err error) {
-	r := string(s)
-	q, err := strconv.ParseInt(r, 10, 64)
-	if err != nil {
-		return err
-	}
-	*(*time.Time)(t) = time.Unix(q, 0)
-	return nil
-}
-
-// Unix returns the unix time stamp of the underlaying time object
-func (t jsonTime) Unix() int64 {
-	return time.Time(t).Unix()
-}
-
-// Time returns the JSON time as a time.Time instance
-func (t jsonTime) Time() time.Time {
-	return time.Time(t)
-}
-
-// String returns time as a formatted string
-func (t jsonTime) String() string {
-	return t.Time().String()
+	Created JSONTime `json:"created"`
 }

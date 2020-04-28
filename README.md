@@ -1,2 +1,4 @@
-# gotiny
-Tinyurl server on Go
+# Gotiny server
+
+A Tiny URL server in Go
+

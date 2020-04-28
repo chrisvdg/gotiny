@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -22,9 +23,43 @@ type Backend interface {
 	Remove(id string) error
 }
 
-// TinyURL represents a tiny url entry in the backend
+// TinyURL represents a tiny url entry
 type TinyURL struct {
-	ID      string
-	URL     string
-	Created time.Time
+	ID      string   `json:"id"`
+	URL     string   `json:"url"`
+	Created JSONTime `json:"created"`
+}
+
+// JSONTime is a time.Time wrapper that JSON (un)marshals into a unix timestamp
+type JSONTime time.Time
+
+// MarshalJSON is used to convert the timestamp to JSON
+func (t JSONTime) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.FormatInt(time.Time(t).Unix(), 10)), nil
+}
+
+// UnmarshalJSON is used to convert the timestamp from JSON
+func (t *JSONTime) UnmarshalJSON(s []byte) (err error) {
+	r := string(s)
+	q, err := strconv.ParseInt(r, 10, 64)
+	if err != nil {
+		return err
+	}
+	*(*time.Time)(t) = time.Unix(q, 0)
+	return nil
+}
+
+// Unix returns the unix time stamp of the underlaying time object
+func (t JSONTime) Unix() int64 {
+	return time.Time(t).Unix()
+}
+
+// Time returns the JSON time as a time.Time instance
+func (t JSONTime) Time() time.Time {
+	return time.Time(t)
+}
+
+// String returns time as a formatted string
+func (t JSONTime) String() string {
+	return t.Time().String()
 }
