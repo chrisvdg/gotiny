@@ -9,6 +9,10 @@ import (
 // ErrNotFound represents an error where a tiny url entry could not be found
 var ErrNotFound error = errors.New("tiny URL entry not found")
 
+// ErrIDInUse represents an error when an ID is already present in the backend
+// Keep in mind that creating a new entry with existing ID and corresponding URL will should not return an/this error
+var ErrIDInUse error = errors.New("tiny URL ID already in use (with other url)")
+
 // Backend defines the interface to the backend
 type Backend interface {
 	// List returns a list of the current tiny URL entries

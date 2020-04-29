@@ -56,27 +56,63 @@ func (l *Logic) List() ([]byte, error) {
 
 // Create creates a new entry in the backend
 func (l *Logic) Create(id string, url string) ([]byte, error) {
-	if id == "" {
-		id = utils.GenerateID(l.defaultIDLen)
-	}
-
-	err := utils.ValidateID(id)
-	if err != nil {
-		return nil, err
+	if id != "" {
+		err := utils.ValidateID(id)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if !strings.HasPrefix(url, "http") {
 		url = fmt.Sprintf("http://%s", url)
 	}
-	err = utils.ValidateURL(url)
+	err := utils.ValidateURL(url)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := l.backend.Create(id, url)
-	if err != nil {
-		log.Error(err)
-		return nil, fmt.Errorf("Failed to create new entry")
+	// If requesting generated ID, check if URL already has an entry in the backend
+	if id == "" {
+		list, err := l.backend.List()
+		if err != nil {
+			log.Error(err)
+			return nil, fmt.Errorf("Failed to create new entry")
+		}
+		for _, i := range list {
+			if i.URL == url {
+				data, err := formatEntry(i, l.prettyJSON)
+				if err != nil {
+					log.Error(err)
+					return nil, fmt.Errorf("Failed to create new entry")
+				}
+
+				return data, nil
+			}
+		}
+	}
+
+	// Retry when ID was generated
+	var res backend.TinyURL
+	entryID := id
+	for {
+		if entryID == "" {
+			entryID = utils.GenerateID(l.defaultIDLen)
+		}
+		err := utils.ValidateID(id)
+		if err != nil {
+			return nil, err
+		}
+
+		res, err = l.backend.Create(entryID, url)
+		if err != nil {
+			if err == backend.ErrIDInUse && id == "" {
+				continue
+			}
+			log.Error(err)
+			return nil, fmt.Errorf("Failed to create new entry")
+		}
+
+		break
 	}
 
 	data, err := formatEntry(res, l.prettyJSON)

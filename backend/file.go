@@ -48,8 +48,11 @@ func (f *File) List() ([]TinyURL, error) {
 
 // Create implements backend.Create
 func (f *File) Create(id string, url string) (TinyURL, error) {
-	if _, ok := f.data[id]; ok {
-		return f.Get(id)
+	if res, ok := f.data[id]; ok {
+		if res.URL == url {
+			return f.Get(id)
+		}
+		return TinyURL{}, ErrIDInUse
 	}
 	t := TinyURL{
 		ID:      id,

@@ -147,6 +147,49 @@ func Test_CreateInvalidURL(t *testing.T) {
 	assert.Nil(result)
 }
 
+func Test_CreateAlreadyExists(t *testing.T) {
+	assert := assert.New(t)
+	l, err := business.NewFileBackedLogic(getFilePath(), false, 5)
+	assert.NoError(err)
+
+	id := "foo"
+	url := "http://foo.bar"
+	url2 := "http://hello.world"
+
+	_, err = l.Create(id, url)
+	assert.NoError(err)
+
+	// Creating with same ID and URL should not return an error
+	_, err = l.Create(id, url)
+	assert.NoError(err)
+
+	// Creating with ID and different url should fail
+	_, err = l.Create(id, url2)
+	assert.Error(err)
+}
+
+// Test_CreateURLExists tests when a request comes in where the ID needs to be genenerated
+// but there is already an entry using this url, it will use the ID that already exists in the backend
+func Test_CreateURLExists(t *testing.T) {
+	assert := assert.New(t)
+	l, err := business.NewFileBackedLogic(getFilePath(), false, 5)
+	assert.NoError(err)
+	var tResult backend.TinyURL
+
+	id := "foo"
+	url := "http://foo.bar"
+
+	_, err = l.Create(id, url)
+	assert.NoError(err)
+
+	result, err := l.Create("", url)
+	assert.NoError(err)
+	err = json.Unmarshal(result, &tResult)
+	assert.NoError(err)
+	assert.Equal(id, tResult.ID)
+	assert.Equal(url, tResult.URL)
+}
+
 func Test_Get(t *testing.T) {
 	assert := assert.New(t)
 	l, err := business.NewFileBackedLogic(getFilePath(), false, 5)

@@ -47,13 +47,39 @@ func Test_Create(t *testing.T) {
 	assert.NoError(err)
 
 	id := utils.GenerateID(5)
-	url := "foo.bar"
+	url := "http://foo.bar"
 
 	res, err := b.Create(id, url)
 	assert.NoError(err)
 	assert.Equal(res.ID, id)
 	assert.Equal(res.URL, url)
 	assert.NotNil(res.Created)
+}
+
+func Test_CreateIDInUser(t *testing.T) {
+	assert := assert.New(t)
+	backendFile := path.Join(testDir, generateBackendfilename())
+	b, err := backend.NewFile(backendFile)
+	assert.NoError(err)
+
+	id := utils.GenerateID(5)
+	url := "http://foo.bar"
+	url2 := "http://lorem.ipsum"
+
+	res, err := b.Create(id, url)
+	assert.NoError(err)
+	assert.Equal(res.ID, id)
+	assert.Equal(res.URL, url)
+	assert.NotNil(res.Created)
+
+	res, err = b.Create(id, url)
+	assert.NoError(err)
+	assert.Equal(res.ID, id)
+	assert.Equal(res.URL, url)
+	assert.NotNil(res.Created)
+
+	_, err = b.Create(id, url2)
+	assert.EqualError(err, backend.ErrIDInUse.Error())
 }
 
 func Test_Get(t *testing.T) {
