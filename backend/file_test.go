@@ -170,6 +170,58 @@ func Test_Remove(t *testing.T) {
 	assert.EqualError(err, backend.ErrNotFound.Error())
 }
 
+func Test_ReuseBackendFile(t *testing.T) {
+	assert := assert.New(t)
+	backendFilePath, b := createFilebackend(t)
+	id1, url1 := addEntry(t, b)
+	id2, url2 := addEntry(t, b)
+
+	res, err := b.Get(id1)
+	assert.NoError(err)
+	assert.Equal(url1, res.URL)
+	res, err = b.Get(id2)
+	assert.NoError(err)
+	assert.Equal(url2, res.URL)
+
+	b2, err := backend.NewFile(backendFilePath)
+	assert.NoError(err)
+
+	list, err := b2.List()
+	fmt.Println(list)
+
+	res, err = b2.Get(id1)
+	assert.NoError(err)
+	assert.Equal(url1, res.URL)
+	res, err = b2.Get(id2)
+	assert.NoError(err)
+	assert.Equal(url2, res.URL)
+}
+
+// Test_UseOfExistingEmptyFile tests initiation of a backend with JSON file content
+// The content in the file can represent different versions of empty JSON structures
+func Test_UseOfExistingEmptyFile(t *testing.T) {
+	assert := assert.New(t)
+	file_data := []byte("")
+	backendFilePath := path.Join(testDir, generateBackendfilename())
+
+	err := ioutil.WriteFile(backendFilePath, file_data, 0666)
+	assert.NoError(err)
+	_, err = backend.NewFile(backendFilePath)
+	assert.NoError(err)
+
+	file_data = []byte("{}")
+	err = ioutil.WriteFile(backendFilePath, file_data, 0666)
+	assert.NoError(err)
+	_, err = backend.NewFile(backendFilePath)
+	assert.NoError(err)
+
+	file_data = []byte("[]")
+	err = ioutil.WriteFile(backendFilePath, file_data, 0666)
+	assert.NoError(err)
+	_, err = backend.NewFile(backendFilePath)
+	assert.NoError(err)
+}
+
 // create_backend_single_entry is a convenience function to create a backend
 // returns backendfile, backend object
 func createFilebackend(t *testing.T) (string, backend.Backend) {

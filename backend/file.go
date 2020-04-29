@@ -23,6 +23,12 @@ func NewFile(filePath string) (*File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to ensure backend file exists: %s", err)
 	}
+
+	err = backend.read()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read data from backendfile: %s", err)
+	}
+
 	return backend, nil
 }
 
@@ -128,6 +134,11 @@ func (f *File) Remove(id string) error {
 	return nil
 }
 
+// Close implements backend.Close
+func (f *File) Close() error {
+	return f.save()
+}
+
 // save writes the current file backend data to the backend file
 func (f *File) save() error {
 	data, err := json.Marshal(f.data)
@@ -146,6 +157,10 @@ func (f *File) read() error {
 	data, err := ioutil.ReadFile(f.filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read backend file: %s", err)
+	}
+
+	if string(data) == "" || string(data) == "[]" {
+		return nil
 	}
 	err = json.Unmarshal(data, &f.data)
 	if err != nil {

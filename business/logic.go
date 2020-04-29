@@ -187,6 +187,11 @@ func (l *Logic) Delete(id string) error {
 	return nil
 }
 
+// Close gracefully closes the backend
+func (l *Logic) Close() error {
+	return l.backend.Close()
+}
+
 func formatList(entries []backend.TinyURL, pretty bool) ([]byte, error) {
 	if pretty {
 		return json.MarshalIndent(entries, "", "\t")

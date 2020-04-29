@@ -25,6 +25,8 @@ type Backend interface {
 	Update(entry TinyURL) error
 	// Remove removes an entry from the backend
 	Remove(id string) error
+	// Flush current data to the backend and gracefully exit (connection)
+	Close() error
 }
 
 // TinyURL represents a tiny url entry
