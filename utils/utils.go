@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"fmt"
 	"math/rand"
-	"net/url"
 	"time"
 )
 
@@ -21,24 +19,4 @@ func GenerateID(length int) string {
 		r[i] = base64URLCharset[rand.Intn(len(base64URLCharset))]
 	}
 	return string(r)
-}
-
-// ValidateID validates a tiny URL ID
-func ValidateID(id string) error {
-	urlSafe := url.QueryEscape(id)
-	if urlSafe != id {
-		return fmt.Errorf("ID contains illegal characters")
-	}
-
-	return nil
-}
-
-// ValidateURL validates provided URL
-func ValidateURL(urlStr string) error {
-	_, err := url.ParseRequestURI(urlStr)
-	if err != nil {
-		return fmt.Errorf("Invalid URL")
-	}
-
-	return err
 }

@@ -68,13 +68,11 @@ func (f *File) Create(id string, url string) (TinyURL, error) {
 		return TinyURL{}, fmt.Errorf("failed to save to backend: %s", err)
 	}
 
-	fmt.Println(f.data)
 	return t, nil
 }
 
 // Get implements backend.Get
 func (f *File) Get(id string) (TinyURL, error) {
-	fmt.Println(f.data)
 	val, ok := f.data[id]
 	if !ok {
 		return TinyURL{}, ErrNotFound
