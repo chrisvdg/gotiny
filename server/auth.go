@@ -77,6 +77,12 @@ func (h *DefaultAuthorizer) AuthenticateCreate(next http.Handler) http.Handler {
 
 			// If id form field has value check the token
 			token := h.getToken(req)
+			err := req.ParseForm()
+			if err != nil {
+				log.Error("Failed to parse form data: %s", err)
+				res.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			reqID := req.Form.Get("id")
 			if reqID != "" {
 				if token != h.writeToken {

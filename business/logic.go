@@ -124,6 +124,16 @@ func (l *Logic) Create(id string, url string) ([]byte, error) {
 	return data, nil
 }
 
+// GetURL returns the URL for the given ID
+func (l *Logic) GetURL(id string) (string, error) {
+	entry, err := l.backend.Get(id)
+	if err != nil {
+		return "", err
+	}
+
+	return entry.URL, nil
+}
+
 // Get returns a json endcoded
 func (l *Logic) Get(id string) ([]byte, error) {
 	entry, err := l.backend.Get(id)

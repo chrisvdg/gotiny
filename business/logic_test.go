@@ -190,6 +190,21 @@ func Test_CreateURLExists(t *testing.T) {
 	assert.Equal(url, tResult.URL)
 }
 
+func Test_GetURL(t *testing.T) {
+	assert := assert.New(t)
+	l, err := business.NewFileBackedLogic(getFilePath(), false, 5)
+	assert.NoError(err)
+
+	id := "foo"
+	url := "http://foo.bar"
+	_, err = l.Create(id, url)
+	assert.NoError(err)
+
+	result, err := l.GetURL(id)
+	assert.NoError(err)
+	assert.Equal(url, result)
+}
+
 func Test_Get(t *testing.T) {
 	assert := assert.New(t)
 	l, err := business.NewFileBackedLogic(getFilePath(), false, 5)
