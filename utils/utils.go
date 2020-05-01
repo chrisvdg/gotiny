@@ -18,5 +18,6 @@ func GenerateID(length int) string {
 	for i := range r {
 		r[i] = base64URLCharset[rand.Intn(len(base64URLCharset))]
 	}
+
 	return string(r)
 }

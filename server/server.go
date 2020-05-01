@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
+
+const defaultBackendFile string = "./backend.json"
 
 // New creates a new server instance
 func New(c *Config) (*Server, error) {
@@ -30,40 +33,90 @@ func (s *Server) AddAPIRoutes(r *mux.Router, b *business.Logic) error {
 }
 
 // AddAPIRoutesAndHandlers adds the API routes with provided handlers and authorizers
-func (s *Server) AddAPIRoutesAndHandlers(r *mux.Router, handler Handlers, auth Authorizer) {
+func (s *Server) AddAPIRoutesAndHandlers(r *mux.Router, handlers Handlers, auth Authorizer) error {
 	if r == nil {
-		r = mux.NewRouter()
+		return fmt.Errorf("Router is nil")
 	}
-	listHandler := http.HandlerFunc(handler.List)
-	createHandler := http.HandlerFunc(handler.CreateTinyURL)
-	updateHandler := http.HandlerFunc(handler.UpdateTinyURL)
-	expandHandler := http.HandlerFunc(handler.ExpandURL)
-	deleteHandler := http.HandlerFunc(handler.RemoveTinyURL)
+	listHandler := http.HandlerFunc(handlers.List)
+	createHandler := http.HandlerFunc(handlers.CreateTinyURL)
+	updateHandler := http.HandlerFunc(handlers.UpdateTinyURL)
+	expandHandler := http.HandlerFunc(handlers.ExpandURL)
+	deleteHandler := http.HandlerFunc(handlers.RemoveTinyURL)
 
-	r.HandleFunc("/api", handler.APISpec).Methods("GET")
+	r.HandleFunc("/api", handlers.APISpec).Methods("GET")
 	r.Handle("/api/tiny", auth.AuthenticateRead(listHandler)).Methods("GET")
 	r.Handle("/api/tiny", auth.AuthenticateCreate(createHandler)).Methods("POST")
-	r.HandleFunc("/api/tiny/{id}", handler.FollowURL).Methods("GET")
+	r.HandleFunc("/api/tiny/{id}", handlers.FollowURL).Methods("GET")
 	r.Handle("/api/tiny/{id}", auth.AuthenticateWrite(updateHandler)).Methods("POST")
 	r.Handle("/api/tiny/{id}", auth.AuthenticateWrite(deleteHandler)).Methods("DELETE")
 	r.Handle("/api/tiny/{id}/expand", auth.AuthenticateRead(expandHandler)).Methods("GET")
-}
 
-// ListenAndServe listens for requests and serves them
-func (s *Server) ListenAndServe(addr string, handler http.Handler) error {
 	return nil
 }
 
-// listenAndServe serves a plain http webserver
-func listenAndServe(cancel func(), addr string, dir string, handler http.Handler) {
+// ListenAndServeFileBackedAPI sets the API routes only with a file backend
+// and listens for requests and serves them
+func (s *Server) ListenAndServeFileBackedAPI() error {
+	file := s.cfg.FileBackendPath
+	if file == "" {
+		file = defaultBackendFile
+	}
+	b, err := business.NewFileBackedLogic(file, s.cfg.PrettyJSON, 5)
+	if err != nil {
+		return err
+	}
+	h, err := NewDefaultHandlers(b)
+	if err != nil {
+		return err
+	}
+
+	s.ListenAndServeAPI(h)
+
+	return nil
+}
+
+// ListenAndServeAPI sets the API routes only with provided backend
+// and listens for requests and serves them
+func (s *Server) ListenAndServeAPI(handlers Handlers) error {
+	r := mux.NewRouter()
+	auth := NewAuthorizer(s.cfg.ReadAuthToken, s.cfg.WriteAuthToken, s.cfg.AllowPublicCreateGenerated)
+	err := s.AddAPIRoutesAndHandlers(r, handlers, auth)
+	if err != nil {
+		return err
+	}
+	s.ListenAndServe(r)
+
+	return nil
+}
+
+// ListenAndServe listens for requests and serves them
+func (s *Server) ListenAndServe(handler http.Handler) {
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	fmt.Printf("Now serving plain http on: localhost%s\n", addr)
-	log.Fatal(http.ListenAndServe(addr, handler))
+
+	tlsEnabled := s.cfg.TLS.CertFile != "" && s.cfg.TLS.KeyFile != ""
+
+	if !s.cfg.TLSOnly {
+		go listenAndServe(ctx, cancel, s.cfg.ListenAddr, handler)
+	}
+
+	if tlsEnabled {
+		go listenAndServeTLS(ctx, cancel, s.cfg.TLSListenAddr, s.cfg.TLS, handler)
+	}
+
+	<-ctx.Done()
+}
+
+// listenAndServe serves a plain http webserver
+func listenAndServe(ctx context.Context, cancel func(), addr string, handler http.Handler) {
+	defer cancel()
+	log.Warningf("http server listening on: localhost%s\n", addr)
+	log.Print(http.ListenAndServe(addr, handler))
 }
 
 // listenAndServeTLS serves a tls webserver
-func listenAndServeTLS(cancel func(), addr string, dir string, cert string, key string, handler http.Handler) {
+func listenAndServeTLS(ctx context.Context, cancel func(), addr string, tls *TLSConfig, handler http.Handler) {
 	defer cancel()
-	fmt.Printf("Now serving tls on: localhost%s\n", addr)
-	log.Fatal(http.ListenAndServeTLS(addr, cert, key, handler))
+	log.Warningf("https server listening on: localhost%s\n", addr)
+	log.Print(http.ListenAndServeTLS(addr, tls.CertFile, tls.KeyFile, handler))
 }

@@ -21,6 +21,13 @@ type Handlers interface {
 	RemoveTinyURL(http.ResponseWriter, *http.Request)
 }
 
+// NewDefaultHandlers creates a new Default handlers instance with provided logic instance
+func NewDefaultHandlers(b *business.Logic) (*DefaultHandlers, error) {
+	return &DefaultHandlers{
+		b: b,
+	}, nil
+}
+
 // DefaultHandlers implements Handlers with the default implementation
 type DefaultHandlers struct {
 	b *business.Logic
@@ -36,7 +43,7 @@ func (h *DefaultHandlers) APISpec(res http.ResponseWriter, req *http.Request) {
 func (h *DefaultHandlers) List(res http.ResponseWriter, req *http.Request) {
 	data, err := h.b.List()
 	if err != nil {
-		writeError(res, err)
+		writeError(res, req, err)
 		return
 	}
 
@@ -47,14 +54,14 @@ func (h *DefaultHandlers) List(res http.ResponseWriter, req *http.Request) {
 func (h *DefaultHandlers) CreateTinyURL(res http.ResponseWriter, req *http.Request) {
 	err := req.ParseForm()
 	if err != nil {
-		writeError(res, fmt.Errorf("Failed to parse form data: %s", err))
+		writeError(res, req, fmt.Errorf("Failed to parse form data: %s", err))
 		return
 	}
 	id := req.Form.Get("id")
 	url := req.Form.Get("url")
 	data, err := h.b.Create(id, url)
 	if err != nil {
-		writeErrorWithValidationCheck(res, err)
+		writeErrorWithValidationCheck(res, req, err)
 	}
 
 	writeJSONResp(res, data)
@@ -65,7 +72,7 @@ func (h *DefaultHandlers) FollowURL(res http.ResponseWriter, req *http.Request) 
 	id := mux.Vars(req)["id"]
 	url, err := h.b.GetURL(id)
 	if err != nil {
-		writeError(res, err)
+		writeError(res, req, err)
 		return
 	}
 
@@ -77,14 +84,14 @@ func (h *DefaultHandlers) UpdateTinyURL(res http.ResponseWriter, req *http.Reque
 	id := mux.Vars(req)["id"]
 	err := req.ParseForm()
 	if err != nil {
-		writeError(res, fmt.Errorf("Failed to parse form data: %s", err))
+		writeError(res, req, fmt.Errorf("Failed to parse form data: %s", err))
 		return
 	}
 	url := req.Form.Get("url")
 
 	err = h.b.Update(id, url)
 	if err != nil {
-		writeErrorWithValidationCheck(res, err)
+		writeErrorWithValidationCheck(res, req, err)
 		return
 	}
 
@@ -97,7 +104,7 @@ func (h *DefaultHandlers) ExpandURL(res http.ResponseWriter, req *http.Request) 
 
 	data, err := h.b.Get(id)
 	if err != nil {
-		writeError(res, err)
+		writeError(res, req, err)
 		return
 	}
 
@@ -110,7 +117,7 @@ func (h *DefaultHandlers) RemoveTinyURL(res http.ResponseWriter, req *http.Reque
 
 	err := h.b.Delete(id)
 	if err != nil {
-		writeError(res, err)
+		writeError(res, req, err)
 		return
 	}
 
@@ -125,9 +132,9 @@ func writeJSONResp(res http.ResponseWriter, data []byte) {
 
 // writeError writes error to the response writer
 // Don't forget to return after calling this function in the handler
-func writeError(res http.ResponseWriter, err error) {
+func writeError(res http.ResponseWriter, req *http.Request, err error) {
 	if err == business.ErrTinyURLNotFound {
-		res.WriteHeader(http.StatusNotFound)
+		http.NotFound(res, req)
 	} else {
 		res.WriteHeader(http.StatusInternalServerError)
 		res.Write([]byte(err.Error()))
@@ -136,11 +143,11 @@ func writeError(res http.ResponseWriter, err error) {
 
 // writeError writes error to the response writer, also checks for validation error
 // Don't forget to return after calling this function in the handler
-func writeErrorWithValidationCheck(res http.ResponseWriter, err error) {
+func writeErrorWithValidationCheck(res http.ResponseWriter, req *http.Request, err error) {
 	if business.IsValidationError(err) {
 		res.WriteHeader(http.StatusBadRequest)
 		res.Write([]byte(err.Error()))
 	} else {
-		writeError(res, err)
+		writeError(res, req, err)
 	}
 }
