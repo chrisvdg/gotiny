@@ -35,7 +35,7 @@ type DefaultHandlers struct {
 
 // APISpec Shows API spec
 func (h *DefaultHandlers) APISpec(res http.ResponseWriter, req *http.Request) {
-	res.Header().Add("Content-Type", "application/x-yaml")
+	res.Header().Add("Content-Type", "text/plain")
 	http.ServeFile(res, req, apiSpecFile)
 }
 

@@ -110,13 +110,13 @@ func (s *Server) ListenAndServe(handler http.Handler) {
 // listenAndServe serves a plain http webserver
 func listenAndServe(ctx context.Context, cancel func(), addr string, handler http.Handler) {
 	defer cancel()
-	log.Warningf("http server listening on: localhost%s\n", addr)
+	log.Infof("http server listening on: localhost%s\n", addr)
 	log.Print(http.ListenAndServe(addr, handler))
 }
 
 // listenAndServeTLS serves a tls webserver
 func listenAndServeTLS(ctx context.Context, cancel func(), addr string, tls *TLSConfig, handler http.Handler) {
 	defer cancel()
-	log.Warningf("https server listening on: localhost%s\n", addr)
+	log.Infof("https server listening on: localhost%s\n", addr)
 	log.Print(http.ListenAndServeTLS(addr, tls.CertFile, tls.KeyFile, handler))
 }

@@ -40,7 +40,7 @@ func main() {
 	if c.Verbose {
 		log.SetLevel(log.DebugLevel)
 	} else {
-		log.SetLevel(log.WarnLevel)
+		log.SetLevel(log.InfoLevel)
 	}
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp:   true,
