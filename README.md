@@ -14,6 +14,19 @@ cd %GOPATH/src/github.com/chrisvdg/gotiny
 go build -mod vendor
 ```
 
+## Docker
+
+```sh
+# Build images
+docker build -t gotiny .
+
+# Run basic http server
+docker run -p 80:80 gotiny
+
+# Run with custom arguments
+docker run gotiny --help
+```
+
 ## Usage
 
 Launch a gotiny server on the default port (":8080"),  
