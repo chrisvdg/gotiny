@@ -11,9 +11,9 @@ paths:
       operationId: apiSpec
       responses:
         "200":
-          description: Array of all created shorthands
+          description: Shows the API spec definition
           content:
-            application/x-yaml:
+            text/plain:
               schema:
                 type: string
   /api/tiny:

@@ -24,7 +24,7 @@ docker build -t gotiny .
 docker run -p 80:80 gotiny
 
 # Run with custom arguments
-docker run gotiny --help
+docker run --rm gotiny --help
 ```
 
 ## Usage
