@@ -5,13 +5,14 @@ import (
 	"github.com/chrisvdg/gotiny/utils"
 )
 
-//ValidationErrors contains a list of possible validation error
-var ValidationErrors = []error{
-	backend.ErrIDInUse,
-}
-
-// ErrTinyURLNotFound represents an error where a Tiny URL could not be found in the backend
-var ErrTinyURLNotFound = backend.ErrNotFound
+var (
+	//ValidationErrors contains a list of possible validation error
+	ValidationErrors = []error{
+		backend.ErrIDInUse,
+	}
+	// ErrTinyURLNotFound represents an error where a Tiny URL could not be found in the backend
+	ErrTinyURLNotFound = backend.ErrNotFound
+)
 
 func init() {
 	ValidationErrors = append(ValidationErrors, utils.ValidationErrors...)

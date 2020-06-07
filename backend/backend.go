@@ -11,7 +11,7 @@ var ErrNotFound error = errors.New("tiny URL entry not found")
 
 // ErrIDInUse represents an error when an ID is already present in the backend
 // Keep in mind that creating a new entry with existing ID and corresponding URL will should not return an/this error
-var ErrIDInUse error = errors.New("tiny URL ID already in use (with other url)")
+var ErrIDInUse error = errors.New("tiny URL ID already in use")
 
 // Backend defines the interface to the backend
 type Backend interface {

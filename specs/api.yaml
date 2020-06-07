@@ -52,6 +52,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TinyURL"
+        "400":
+          description: Bad request
+          content:
+            text/plain:
+              schema:
+                type: string
 
   /api/tiny/{id}:
     get:

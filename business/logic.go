@@ -56,6 +56,7 @@ func (l *Logic) List() ([]byte, error) {
 
 // Create creates a new entry in the backend
 func (l *Logic) Create(id string, url string) ([]byte, error) {
+	errDefault := fmt.Errorf("Failed to create new entry")
 	if id != "" {
 		err := utils.ValidateID(id)
 		if err != nil {
@@ -76,14 +77,14 @@ func (l *Logic) Create(id string, url string) ([]byte, error) {
 		list, err := l.backend.List()
 		if err != nil {
 			log.Error(err)
-			return nil, fmt.Errorf("Failed to create new entry")
+			return nil, errDefault
 		}
 		for _, i := range list {
 			if i.URL == url {
 				data, err := formatEntry(i, l.prettyJSON)
 				if err != nil {
 					log.Error(err)
-					return nil, fmt.Errorf("Failed to create new entry")
+					return nil, errDefault
 				}
 
 				return data, nil
@@ -109,7 +110,10 @@ func (l *Logic) Create(id string, url string) ([]byte, error) {
 				continue
 			}
 			log.Error(err)
-			return nil, fmt.Errorf("Failed to create new entry")
+			if !IsValidationError(err) {
+				err = errDefault
+			}
+			return nil, err
 		}
 
 		break
@@ -118,7 +122,7 @@ func (l *Logic) Create(id string, url string) ([]byte, error) {
 	data, err := formatEntry(res, l.prettyJSON)
 	if err != nil {
 		log.Error(err)
-		return nil, fmt.Errorf("Failed to create new entry")
+		return nil, errDefault
 	}
 
 	return data, nil

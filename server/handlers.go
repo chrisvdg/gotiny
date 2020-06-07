@@ -62,6 +62,7 @@ func (h *DefaultHandlers) CreateTinyURL(res http.ResponseWriter, req *http.Reque
 	data, err := h.b.Create(id, url)
 	if err != nil {
 		writeErrorWithValidationCheck(res, req, err)
+		return
 	}
 
 	writeJSONResp(res, data)
