@@ -180,10 +180,10 @@ func (f *File) ensureFile() error {
 	return file.Close()
 }
 
-// List represents a list of backend entries
+// fileData represents a list of backend entries
 type fileData map[string]fileEntry
 
-// Entry represents a tiny URL entry in the backend
+// fileEntry represents a tiny URL entry in the backend
 type fileEntry struct {
 	URL     string   `json:"url"`
 	Created JSONTime `json:"created"`

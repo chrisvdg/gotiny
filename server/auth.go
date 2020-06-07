@@ -71,7 +71,7 @@ func (h *DefaultAuthorizer) AuthenticateCreate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		if h.writeToken != "" {
 			if !h.allowPublicCreateGenerated {
-				h.AuthenticateWrite(next)
+				h.AuthenticateWrite(next).ServeHTTP(res, req)
 				return
 			}
 

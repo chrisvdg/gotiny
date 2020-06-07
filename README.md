@@ -1,6 +1,6 @@
 # Gotiny server
 
-A Tiny URL server in Go
+A Tiny URL (API) server in Go
 
 ## Prerequisites
 
