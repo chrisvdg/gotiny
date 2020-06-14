@@ -29,6 +29,9 @@ docker run --rm gotiny --help
 
 ## Usage
 
+A client library is available in the [gotiny_client repository.](https://github.com/chrisvdg/gotiny_client)  
+The following examples use `CURL` instead.
+
 Launch a gotiny server on the default port (":8080"),  
 without any authentication and
 pretty print the json output.
