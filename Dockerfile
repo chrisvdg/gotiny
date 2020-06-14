@@ -16,6 +16,7 @@ FROM alpine:$alpine_version
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 COPY --from=builder /go/bin/gotiny /bin
+COPY specs/api.yaml /specs/api.yaml
 RUN mkdir /data
 
 EXPOSE 80 443
